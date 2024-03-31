@@ -18,14 +18,12 @@ repositories {
 
 dependencies {
     val cucumberVersion = "7.16.1"
-    val hibernateOrmVersion = "6.4.4.Final"
-    val sqliteVersion = "3.45.2.0"
 
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-//	implementation("org.liquibase:liquibase-core")
     implementation("com.h2database:h2")
+    implementation("org.liquibase:liquibase-core")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
