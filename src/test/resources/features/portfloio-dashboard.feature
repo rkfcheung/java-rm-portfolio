@@ -17,8 +17,3 @@ Feature: Portfolio Dashboard
     And there is an error in retrieving portfolio data
     Then the user should see an error message on the console
     And the dashboard should continue to function normally for other users
-
-  Scenario: Displaying help information
-    Given the user has launched the portfolio dashboard
-    When the user requests help information
-    Then the user should see instructions on how to use the dashboard

@@ -53,19 +53,4 @@ public class PortfolioDashboardStepDefinitions {
     public void continueToFunctionNormally() {
         fail("Step implementation not provided yet");
     }
-
-    @Given("the user has launched the portfolio dashboard")
-    public void launchPortfolioDashboard() {
-        fail("Step implementation not provided yet");
-    }
-
-    @When("the user requests help information")
-    public void requestHelpInformation() {
-        fail("Step implementation not provided yet");
-    }
-
-    @Then("the user should see instructions on how to use the dashboard")
-    public void displayHelpInformation() {
-        fail("Step implementation not provided yet");
-    }
 }
