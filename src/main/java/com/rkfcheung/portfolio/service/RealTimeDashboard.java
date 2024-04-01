@@ -47,6 +47,10 @@ public class RealTimeDashboard {
     }
 
     private void display(final @NonNull List<QuoteUpdate> updates) {
+        if (updates.isEmpty()) {
+            return;
+        }
+
         final StringBuilder sb = new StringBuilder();
         sb.append("## ").append(updated.getAndIncrement()).append(" Market Data Update\n");
         updates.forEach(update -> {

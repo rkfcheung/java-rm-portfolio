@@ -26,6 +26,7 @@ class NavPricerTest {
         reset(source);
         reset(combinedQuoteProvider);
 
+        when(source.available()).thenReturn(true);
         mockData();
     }
 
