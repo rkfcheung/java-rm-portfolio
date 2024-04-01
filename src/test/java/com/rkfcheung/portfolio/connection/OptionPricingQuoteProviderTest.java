@@ -2,6 +2,7 @@ package com.rkfcheung.portfolio.connection;
 
 import com.rkfcheung.portfolio.model.Option;
 import com.rkfcheung.portfolio.model.OptionType;
+import com.rkfcheung.portfolio.util.PositionHelper;
 import com.rkfcheung.portfolio.util.ValueUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,8 +15,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class OptionPricingQuoteProviderTest {
 
@@ -25,6 +25,8 @@ class OptionPricingQuoteProviderTest {
 
     @BeforeEach
     void setUp() {
+        reset(underlyingQuoteProvider);
+
         when(underlyingQuoteProvider.quote(anyString())).thenReturn(BigDecimal.valueOf(123.45678));
         when(underlyingQuoteProvider.volatility(anyString())).thenReturn(BigDecimal.valueOf(0.314));
     }
@@ -75,20 +77,9 @@ class OptionPricingQuoteProviderTest {
     }
 
     private Option prepare(final String underlying, final BigDecimal strike, final OptionType type) {
-        final LocalDate test = LocalDate.now().plusMonths(3L);
-        final String year = String.valueOf(test.getYear());
-        final String month = test.getMonth().name().substring(0, 3);
-        final LocalDate maturity = ValueUtil.asLocalDate(year, month);
-        final BigDecimal k = ValueUtil.round(strike);
-        final String symbol = underlying + "-" + month + "-" + year + "-" + k + "-" + type;
+        final LocalDate maturity = LocalDate.now().plusMonths(3L);
 
-        return Option.builder()
-                .symbol(symbol)
-                .underlying(underlying)
-                .strike(k)
-                .maturity(maturity)
-                .type(type)
-                .build();
+        return PositionHelper.prepare(underlying, maturity.getMonth(), maturity.getYear(), ValueUtil.round(strike), type);
     }
 
     private boolean verifyPutCallParity(
