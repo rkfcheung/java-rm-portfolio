@@ -38,16 +38,6 @@ public class ValueUtil {
     }
 
     @Nullable
-    public static Integer asInt(final String value) {
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-
-    @Nullable
     public static LocalDate asLocalDate(final String year, final String month) {
         if (ObjectUtils.isEmpty(year) || ObjectUtils.isEmpty(month)) {
             return null;

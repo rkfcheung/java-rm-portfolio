@@ -2,6 +2,20 @@
 
 Real-time Portfolio Dashboard on Console in Java 8
 
+## Quote Service
+
+The [`QuoteService`](src/main/java/com/rkfcheung/portfolio/service/QuoteService.java) is responsible for providing
+updated quoted prices for portfolio positions. It acts as a central service that retrieves real-time market data and
+calculates the current prices for various securities held in the portfolio. This service ensures that portfolio
+positions are accurately valued based on the latest market information.
+
+## Real-Time Dashboard
+
+The [`RealTimeDashboard`](src/main/java/com/rkfcheung/portfolio/service/RealTimeDashboard.java) is a component that
+subscribes to the `QuoteUpdate`s emitted by the `QuoteService`. Its primary function is to update the portfolio summary
+in real-time based on the received updates. By continuously monitoring changes in quoted prices, the `RealTimeDashboard`
+ensures that the portfolio summary displayed to users reflects the most current valuation of their investments.
+
 ## Build
 
 ```shell
