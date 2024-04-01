@@ -1,56 +1,64 @@
 package com.rkfcheung.portfolio.integration;
 
+import com.rkfcheung.portfolio.connection.NavPricer;
+import com.rkfcheung.portfolio.model.NavEntry;
+import com.rkfcheung.portfolio.model.Position;
+import com.rkfcheung.portfolio.service.RealTimeDashboard;
+import com.rkfcheung.portfolio.source.Source;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import lombok.RequiredArgsConstructor;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import java.util.List;
 
-public class PortfolioDashboardStepDefinitions {
+import static org.junit.jupiter.api.Assertions.*;
 
-    @Given("the portfolio dashboard is connected to the Portfolio server")
-    public void connectToPortfolioServer() {
-        fail("Step implementation not provided yet");
+@RequiredArgsConstructor
+public class PortfolioDashboardStepDefinitions extends CucumberSpringConfiguration {
+    private final NavPricer navPricer;
+    private final RealTimeDashboard realTimeDashboard;
+    private final Source source;
+
+    @Given("the portfolio dashboard is connected to the Quote service")
+    public void connectToQuoteService() {
+        assertTrue(realTimeDashboard.isConnected());
     }
 
     @Given("the user has provided a CSV input file with portfolio positions")
     public void provideCSVInputFile() {
-        fail("Step implementation not provided yet");
+        assertTrue(source.available());
     }
 
     @When("the dashboard retrieves the portfolio data")
     public void retrievePortfolioData() {
-        fail("Step implementation not provided yet");
+        final List<Position> positions = source.load();
+        assertEquals(positions.size(), navPricer.load().size());
+        positions.forEach(it -> {
+            final NavEntry entry = navPricer.get(it.getSecurity());
+            assertNotNull(entry);
+            assertEquals(0, it.getQty().compareTo(entry.getQty()));
+        });
     }
 
     @Then("the user should see the portfolio summary with market values")
     public void displayPortfolioSummary() {
-        fail("Step implementation not provided yet");
+        final String summary = realTimeDashboard.summary();
+        assertTrue(summary.contains("Total portfolio"));
     }
 
-    @When("the dashboard receives an updated CSV input file")
-    public void receiveUpdatedCSVInputFile() {
-        fail("Step implementation not provided yet");
+    @When("the dashboard receives an updated quotes")
+    public void receiveUpdatedQuotes() {
+        assertTrue(realTimeDashboard.updatedCount() > 1);
     }
 
     @Then("the user should see the updated portfolio summary with market values")
-    public void displayUpdatedPortfolioSummary() {
-        fail("Step implementation not provided yet");
-    }
+    public void displayUpdatedPortfolioSummary() throws InterruptedException {
+        final long currentCount = realTimeDashboard.updatedCount();
+        final String currentSummary = realTimeDashboard.summary();
 
-    @Then("the user should see an error message on the console")
-    public void displayErrorMessage() {
-        // Implementation to check if an error message is displayed on the console
-        fail("Step implementation not provided yet");
-    }
-
-    @Given("there is an error in retrieving portfolio data")
-    public void simulateErrorInRetrievingData() {
-        fail("Step implementation not provided yet");
-    }
-
-    @Then("the dashboard should continue to function normally for other users")
-    public void continueToFunctionNormally() {
-        fail("Step implementation not provided yet");
+        Thread.sleep(2_000L);
+        assertTrue(realTimeDashboard.updatedCount() > currentCount);
+        assertNotEquals(currentSummary, realTimeDashboard.summary());
     }
 }

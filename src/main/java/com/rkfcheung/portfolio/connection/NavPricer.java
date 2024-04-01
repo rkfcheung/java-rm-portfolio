@@ -5,6 +5,7 @@ import com.rkfcheung.portfolio.model.Option;
 import com.rkfcheung.portfolio.model.Position;
 import com.rkfcheung.portfolio.model.Security;
 import com.rkfcheung.portfolio.source.Source;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
@@ -32,6 +33,11 @@ public class NavPricer {
     @PostConstruct
     public void init() {
         loadPositions();
+    }
+
+    @Nullable
+    public NavEntry get(final @NonNull Security security) {
+        return get(security.getSymbol());
     }
 
     @Nullable

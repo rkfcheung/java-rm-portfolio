@@ -15,10 +15,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Slf4j
 @RequiredArgsConstructor
 public class CsvSource implements Source {
+
+    private final List<Position> positions = new CopyOnWriteArrayList<>();
 
     private final File input;
 
@@ -33,6 +36,10 @@ public class CsvSource implements Source {
 
     @Override
     public List<Position> load() {
+        if (!positions.isEmpty()) {
+            return positions;
+        }
+
         try {
             final List<String> lines = Files.readAllLines(input.toPath());
             if (lines.isEmpty()) {
@@ -52,6 +59,7 @@ public class CsvSource implements Source {
                     result.add(position);
                 }
             }
+            positions.addAll(result);
 
             return result;
         } catch (IOException e) {
