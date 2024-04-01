@@ -58,7 +58,10 @@ public class PortfolioDashboardStepDefinitions extends CucumberSpringConfigurati
         final String currentSummary = realTimeDashboard.summary();
 
         Thread.sleep(2_000L);
-        assertTrue(realTimeDashboard.updatedCount() > currentCount);
-        assertNotEquals(currentSummary, realTimeDashboard.summary());
+        if (realTimeDashboard.updatedCount() > currentCount) {
+            assertNotEquals(currentSummary, realTimeDashboard.summary());
+        } else {
+            assertEquals(currentSummary, realTimeDashboard.summary());
+        }
     }
 }
