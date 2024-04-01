@@ -3,7 +3,10 @@
 THIS_DIR=$(cd $(dirname $0); pwd)
 CSV_FILE=$1
 
-if [[ -f "${CSV_FILE}" ]]; then
+if [[ -z "${CSV_FILE}" ]]; then
+  echo "Using sample CSV ..."
+  "${THIS_DIR}"/gradlew clean bootRun
+elif [[ -f "${CSV_FILE}" ]]; then
   echo "Using ${CSV_FILE} ..."
   export PORTFOLIO_FILE=${CSV_FILE}
 
