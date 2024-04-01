@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QuoteService {
 
+    private final static long REFRESH_RATE = 400L;
     private final Map<Equity, BigDecimal> prices = new ConcurrentHashMap<>();
     private final Source source;
     private final UnderlyingQuoteProvider underlyingQuoteProvider;
@@ -43,7 +44,7 @@ public class QuoteService {
     }
 
     public Flux<List<QuoteUpdate>> refresh() {
-        return Flux.interval(Duration.ofMillis(500L))
+        return Flux.interval(Duration.ofMillis(REFRESH_RATE))
                 .flatMap(it -> Mono.fromCallable(this::getUpdates));
     }
 
