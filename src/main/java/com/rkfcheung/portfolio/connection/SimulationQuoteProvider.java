@@ -1,5 +1,6 @@
 package com.rkfcheung.portfolio.connection;
 
+import com.rkfcheung.portfolio.model.ExpireAfter;
 import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
@@ -7,39 +8,131 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SimulationQuoteProvider implements QuoteProvider {
+public class SimulationQuoteProvider extends UnderlyingQuoteProvider {
 
+    private final static double MIN_MU_VOL = 0.0;
+    private final static double MAX_MU_VOL = 1.0;
     private final static double MIN_PRICE = 0.01;
     private final static double MAX_PRICE = 100_000.0;
-    private final static double PRICE_MOVE = 0.05;
+    private final static int MC_STEPS = 1_000;
+    private final static double SCALING_FACTOR = 7_257_600.0;
     private final Random simulation = new Random();
-    private final Map<String, BigDecimal> store = new ConcurrentHashMap<>();
+    private final Map<String, Double> muStore = new ConcurrentHashMap<>();
+    private final Map<String, ExpireAfter<BigDecimal>> priceStore = new ConcurrentHashMap<>();
+    private final Map<String, BigDecimal> volStore = new ConcurrentHashMap<>();
 
     @Override
     public BigDecimal quote(final String symbol) {
-        final BigDecimal found = store.get(symbol);
-        final BigDecimal currentPrice = getCurrentPrice(symbol);
-        if (found == null) {
+        final ExpireAfter<BigDecimal> found = getCurrentPrice(symbol);
+        final BigDecimal currentPrice = found.getData();
+        if (!found.isExpired()) {
             return currentPrice;
         }
 
-        final double delta = currentPrice.doubleValue() * PRICE_MOVE * (simulation.nextDouble() * 2 - 1);
+        final double s = currentPrice.doubleValue();
+        final double deltaT = deltaT() / SCALING_FACTOR;
+        final double mu = mu(symbol);
+        final double sigma = sigma();
+        final double delta = simulatePriceChange(s, mu, deltaT, sigma);
         final BigDecimal newPrice = currentPrice.add(BigDecimal.valueOf(delta));
-        store.put(symbol, newPrice);
 
-        return newPrice;
+        return save(symbol, newPrice).getData();
     }
 
-    @NonNull
-    private BigDecimal getCurrentPrice(final String symbol) {
-        final BigDecimal value = store.get(symbol);
+    @Override
+    public BigDecimal volatility(final String symbol) {
+        final BigDecimal value = volStore.get(symbol);
         if (value != null) {
             return value;
         }
 
-        final BigDecimal price = BigDecimal.valueOf(MIN_PRICE + (MAX_PRICE - MIN_PRICE) * simulation.nextDouble());
-        store.put(symbol, price);
+        final double currentPrice = quote(symbol).doubleValue();
+        final double mu = mu(symbol);
+        final double sigma = sigma();
+        final BigDecimal vol = BigDecimal.valueOf(simulateVolatility(currentPrice, mu, sigma));
+        volStore.put(symbol, vol);
 
-        return price;
+        return vol;
+    }
+
+    private double deltaT() {
+        return random(0.5, 2);
+    }
+
+    @NonNull
+    private ExpireAfter<BigDecimal> getCurrentPrice(final String symbol) {
+        final ExpireAfter<BigDecimal> value = priceStore.get(symbol);
+        if (value != null) {
+            return value;
+        }
+
+        return save(symbol, BigDecimal.valueOf(random(MIN_PRICE, MAX_PRICE)));
+    }
+
+    private double mu(final String symbol) {
+        final Double found = muStore.get(symbol);
+        if (found != null) {
+            return found;
+        }
+
+        final double value = random(MIN_MU_VOL, MAX_MU_VOL);
+        muStore.put(symbol, value);
+
+        return value;
+    }
+
+    private double random(final double minVal, final double maxVal) {
+        return minVal + (maxVal - minVal) * simulation.nextDouble();
+    }
+
+    @NonNull
+    private ExpireAfter<BigDecimal> save(final String symbol, final BigDecimal price) {
+        final double duration = deltaT() * 1_000;
+        final ExpireAfter<BigDecimal> value = new ExpireAfter<>(price, (long) duration);
+        priceStore.put(symbol, value);
+
+        return value;
+    }
+
+    private double sigma() {
+        return random(MIN_MU_VOL, MAX_MU_VOL);
+    }
+
+    private double simulatePriceChange(
+            final double s,
+            final double mu,
+            final double deltaT,
+            final double sigma
+    ) {
+        double epsilon = simulation.nextGaussian(); // Standardized normal distribution
+
+        return s * (mu * deltaT + sigma * epsilon * Math.sqrt(deltaT));
+    }
+
+    private double simulateVolatility(final double currentPrice, final double mu, final double sigma) {
+        final int tradingPeriodsPerYear = 252;
+        final double deltaT = 1.0 / tradingPeriodsPerYear;
+        final double[] priceChanges = new double[MC_STEPS];
+
+        // Simulate stock price changes
+        double s = currentPrice;
+        for (int i = 0; i < MC_STEPS; i++) {
+            double deltaS = simulatePriceChange(s, mu, deltaT, sigma);
+            s += deltaS;
+            priceChanges[i] = deltaS;
+        }
+
+        // Calculate standard deviation of price changes
+        double sumSquaredDiff = 0.0;
+        double sum = 0.0;
+        for (double deltaS : priceChanges) {
+            sum += deltaS;
+            sumSquaredDiff += deltaS * deltaS;
+        }
+        final double mean = sum / MC_STEPS;
+        final double variance = sumSquaredDiff / MC_STEPS - mean * mean;
+        final double volatility = Math.sqrt(variance);
+
+        return volatility * Math.sqrt(tradingPeriodsPerYear);
     }
 }

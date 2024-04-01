@@ -1,8 +1,10 @@
 package com.rkfcheung.portfolio.connection;
 
+import com.rkfcheung.portfolio.model.Security;
+
 import java.math.BigDecimal;
 
-public interface QuoteProvider {
+public interface QuoteProvider<T extends Security> {
 
-    BigDecimal quote(final String symbol);
+    BigDecimal quote(final T security);
 }
