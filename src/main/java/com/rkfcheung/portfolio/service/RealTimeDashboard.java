@@ -30,23 +30,23 @@ public class RealTimeDashboard {
     }
 
     private void display(final @NonNull List<QuoteUpdate> updates) {
-        log.info("## {} Market Data Update", updated.getAndIncrement());
+        System.out.println("## " + updated.getAndIncrement() + " Market Data Update");
         updates.forEach(update -> {
             final String symbol = update.getEquity().getSymbol();
-            log.info("{} change to {}", symbol, DECIMAL_FORMAT.format(update.getPrice()));
+            System.out.println(symbol + " change to " + DECIMAL_FORMAT.format(update.getPrice()));
             navPricer.update(symbol);
         });
-        log.info("");
-        log.info("## Portfolio");
-        log.info("{}", String.format(NAV_ENTRY, "symbol", "price", "qty", "value"));
-        navPricer.load().forEach(it -> log.info("{}", String.format(NAV_ENTRY,
+        System.out.println();
+        System.out.println("## Portfolio");
+        System.out.printf((NAV_ENTRY) + "%n", "symbol", "price", "qty", "value");
+        navPricer.load().forEach(it -> System.out.printf((NAV_ENTRY) + "%n",
                 it.getSecurity().getSymbol(),
                 DECIMAL_FORMAT.format(it.getPrice()),
                 DECIMAL_FORMAT.format(it.getQty()),
                 DECIMAL_FORMAT.format(it.getValue())
-        )));
-        log.info("");
-        log.info("{}", String.format(NAV_ENTRY, "#Total portfolio", "", "", DECIMAL_FORMAT.format(navPricer.total())));
-        log.info("");
+        ));
+        System.out.println();
+        System.out.printf((NAV_ENTRY) + "%n", "#Total portfolio", "", "", DECIMAL_FORMAT.format(navPricer.total()));
+        System.out.println();
     }
 }

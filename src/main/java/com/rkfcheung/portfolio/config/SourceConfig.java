@@ -1,6 +1,7 @@
 package com.rkfcheung.portfolio.config;
 
 import com.rkfcheung.portfolio.source.CsvSource;
+import com.rkfcheung.portfolio.source.EmptySource;
 import com.rkfcheung.portfolio.source.Source;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +11,6 @@ import org.springframework.core.io.ResourceLoader;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 
 @Slf4j
 @Configuration
@@ -36,7 +36,7 @@ public class SourceConfig {
         } catch (IOException e) {
             log.error("Failed to read {}: {}", input, e.getMessage());
 
-            throw new UncheckedIOException(e);
+            return new EmptySource();
         }
     }
 }

@@ -31,26 +31,7 @@ public class NavPricer {
 
     @PostConstruct
     public void init() {
-        BigDecimal nav = BigDecimal.ZERO;
-        for (final Position position : source.load()) {
-            final Security security = position.getSecurity();
-            final BigDecimal price = combinedQuoteProvider.quote(security);
-            final NavEntry entry = new NavEntry(position, price);
-            positions.put(security.getSymbol(), new NavEntry(position, price));
-            if (position.isOption()) {
-                final Option option = (Option) security;
-                final String underlying = option.getUnderlying();
-                if (!options.containsKey(underlying)) {
-                    options.put(underlying, new ArrayList<>());
-                }
-                options.get(underlying).add(option);
-            }
-
-            nav = nav.add(entry.getValue());
-        }
-        total.set(nav);
-
-        log.debug("{} positions loaded with total portfolio value: {}", positions.size(), total.get());
+        loadPositions();
     }
 
     @Nullable
@@ -60,7 +41,7 @@ public class NavPricer {
 
     public List<NavEntry> load() {
         if (positions.isEmpty()) {
-            init();
+            loadPositions();
         }
 
         return new ArrayList<>(positions.values());
@@ -91,5 +72,34 @@ public class NavPricer {
         final BigDecimal newValue = entry.getValue();
         final BigDecimal newNav = total.get().subtract(oldValue).add(newValue);
         total.set(newNav);
+    }
+
+    private void loadPositions() {
+        if (!source.available()) {
+            log.warn("Source isn't available.");
+
+            return;
+        }
+
+        BigDecimal nav = BigDecimal.ZERO;
+        for (final Position position : source.load()) {
+            final Security security = position.getSecurity();
+            final BigDecimal price = combinedQuoteProvider.quote(security);
+            final NavEntry entry = new NavEntry(position, price);
+            positions.put(security.getSymbol(), new NavEntry(position, price));
+            if (position.isOption()) {
+                final Option option = (Option) security;
+                final String underlying = option.getUnderlying();
+                if (!options.containsKey(underlying)) {
+                    options.put(underlying, new ArrayList<>());
+                }
+                options.get(underlying).add(option);
+            }
+
+            nav = nav.add(entry.getValue());
+        }
+        total.set(nav);
+
+        log.debug("{} positions loaded with total portfolio value: {}", positions.size(), total.get());
     }
 }

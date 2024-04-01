@@ -6,6 +6,7 @@ import com.rkfcheung.portfolio.model.Position;
 import com.rkfcheung.portfolio.model.QuoteUpdate;
 import com.rkfcheung.portfolio.source.Source;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,10 +17,10 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QuoteService {
@@ -30,11 +31,15 @@ public class QuoteService {
 
     @PostConstruct
     public void init() {
-        source.load().stream().filter(Position::isEquity).forEach(it -> {
-            final Equity equity = (Equity) it.getSecurity();
-            final BigDecimal price = underlyingQuoteProvider.quote(equity);
-            prices.put(equity, price);
-        });
+        if (source.available()) {
+            source.load().stream().filter(Position::isEquity).forEach(it -> {
+                final Equity equity = (Equity) it.getSecurity();
+                final BigDecimal price = underlyingQuoteProvider.quote(equity);
+                prices.put(equity, price);
+            });
+        } else {
+            log.warn("Source isn't available.");
+        }
     }
 
     public Flux<List<QuoteUpdate>> refresh() {
