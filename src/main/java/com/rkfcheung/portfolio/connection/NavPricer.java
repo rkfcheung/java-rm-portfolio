@@ -6,6 +6,7 @@ import com.rkfcheung.portfolio.model.Position;
 import com.rkfcheung.portfolio.model.Security;
 import com.rkfcheung.portfolio.source.Source;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+@Slf4j
 @RequiredArgsConstructor
 public class NavPricer {
 
@@ -47,6 +49,8 @@ public class NavPricer {
             nav = nav.add(entry.getValue());
         }
         total.set(nav);
+
+        log.info("{} positions loaded with total portfolio value: {}", positions.size(), total.get());
     }
 
     @Nullable

@@ -25,6 +25,10 @@ public class Position {
                 .build();
     }
 
+    public boolean isEquity() {
+        return security instanceof Equity;
+    }
+
     public boolean isOption() {
         return security instanceof Option;
     }
