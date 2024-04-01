@@ -34,7 +34,7 @@ public class OptionPricingQuoteProvider extends OptionQuoteProvider {
         final double r = riskFreeRate().doubleValue();
         final double t = expiredInYear(option.getMaturity());
         final double sigma = underlyingQuoteProvider.volatility(underlying).doubleValue();
-        log.info("Pricing {} with [s={}, r={}, t={}, sigma={}] ...", option, s, r, t, sigma);
+        log.debug("Pricing {} with [s={}, r={}, t={}, sigma={}] ...", option, s, r, t, sigma);
 
         final double modelPrice;
         if (option.getType() == OptionType.C) {

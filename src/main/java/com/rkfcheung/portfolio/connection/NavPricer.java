@@ -50,7 +50,7 @@ public class NavPricer {
         }
         total.set(nav);
 
-        log.info("{} positions loaded with total portfolio value: {}", positions.size(), total.get());
+        log.debug("{} positions loaded with total portfolio value: {}", positions.size(), total.get());
     }
 
     @Nullable

@@ -84,7 +84,7 @@ public class ValueUtil {
 
     @NonNull
     public static BigDecimal round(final @NonNull BigDecimal value) {
-        return value.setScale(5, RoundingMode.FLOOR);
+        return value.setScale(2, RoundingMode.FLOOR);
     }
 
     @NonNull

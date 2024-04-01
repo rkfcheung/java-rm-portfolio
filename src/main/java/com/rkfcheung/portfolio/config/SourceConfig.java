@@ -30,7 +30,7 @@ public class SourceConfig {
     public Source source() {
         try {
             final File file = resourceLoader.getResource(input).getFile();
-            log.info("Reading input={} ...", file);
+            log.debug("Reading input={} ...", file);
 
             return new CsvSource(file);
         } catch (IOException e) {

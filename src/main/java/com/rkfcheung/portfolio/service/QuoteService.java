@@ -13,8 +13,10 @@ import reactor.core.publisher.Mono;
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -35,23 +37,25 @@ public class QuoteService {
         });
     }
 
-    public Flux<QuoteUpdate> refresh() {
-        return Flux.interval(Duration.ofMillis(500))
-                .flatMap(it -> Flux.fromIterable(prices.entrySet().stream()
-                                .map(entry -> {
-                                    final Equity equity = entry.getKey();
-                                    final BigDecimal currentPrice = entry.getValue();
+    public Flux<List<QuoteUpdate>> refresh() {
+        return Flux.interval(Duration.ofMillis(500L))
+                .flatMap(it -> Mono.fromCallable(this::getUpdates));
+    }
 
-                                    return Mono.fromCallable(() -> {
-                                        final BigDecimal newPrice = underlyingQuoteProvider.quote(equity);
-                                        if (currentPrice.compareTo(newPrice) != 0) {
-                                            return QuoteUpdate.builder().equity(equity).price(newPrice).build();
-                                        } else {
-                                            return null;
-                                        }
-                                    });
-                                }).collect(Collectors.toList()))
-                        .flatMap(mono -> mono)
-                        .filter(Objects::nonNull));
+    private List<QuoteUpdate> getUpdates() {
+        return prices.entrySet().stream()
+                .map(entry -> {
+                    final Equity equity = entry.getKey();
+                    final BigDecimal currentPrice = entry.getValue();
+
+                    final BigDecimal newPrice = underlyingQuoteProvider.quote(equity);
+                    if (currentPrice.compareTo(newPrice) != 0) {
+                        return QuoteUpdate.builder().equity(equity).price(newPrice).build();
+                    } else {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }
