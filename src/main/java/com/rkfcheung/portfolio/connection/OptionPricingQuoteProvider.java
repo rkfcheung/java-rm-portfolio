@@ -4,9 +4,8 @@ import com.rkfcheung.portfolio.model.InterestRate;
 import com.rkfcheung.portfolio.model.Option;
 import com.rkfcheung.portfolio.model.OptionType;
 import com.rkfcheung.portfolio.util.ValueUtil;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
@@ -54,15 +53,15 @@ public class OptionPricingQuoteProvider extends OptionQuoteProvider {
             final double t,
             final double sigma
     ) {
-        final Pair<Double, Double> d1d2 = calcD1D2(s, k, r, t, sigma);
-        final double d1 = d1d2.getFirst();
-        final double d2 = d1d2.getSecond();
+        final Intermediate d1d2 = calcD1D2(s, k, r, t, sigma);
+        final double d1 = d1d2.getD1();
+        final double d2 = d1d2.getD2();
 
         return s * cumulativeDistributionFunction(d1) - k * Math.exp(-r * t) * cumulativeDistributionFunction(d2);
     }
 
     @NonNull
-    private Pair<Double, Double> calcD1D2(
+    private Intermediate calcD1D2(
             final double s,
             final double k,
             final double r,
@@ -72,7 +71,7 @@ public class OptionPricingQuoteProvider extends OptionQuoteProvider {
         final double d1 = (Math.log(s / k) + (r + 0.5 * sigma * sigma) * t) / (sigma * Math.sqrt(t));
         final double d2 = d1 - sigma * Math.sqrt(t);
 
-        return Pair.of(d1, d2);
+        return Intermediate.builder().d1(d1).d2(d2).build();
     }
 
     private double calcPutPrice(
@@ -82,9 +81,9 @@ public class OptionPricingQuoteProvider extends OptionQuoteProvider {
             final double t,
             final double sigma
     ) {
-        final Pair<Double, Double> d1d2 = calcD1D2(s, k, r, t, sigma);
-        final double d1 = d1d2.getFirst();
-        final double d2 = d1d2.getSecond();
+        final Intermediate d1d2 = calcD1D2(s, k, r, t, sigma);
+        final double d1 = d1d2.getD1();
+        final double d2 = d1d2.getD2();
 
         return k * Math.exp(-r * t) * cumulativeDistributionFunction(-d2) - s * cumulativeDistributionFunction(-d1);
     }
@@ -115,5 +114,12 @@ public class OptionPricingQuoteProvider extends OptionQuoteProvider {
 
     private BigDecimal riskFreeRate() {
         return riskFreeQuoteProvider.quote(RISK_FREE_TICKER);
+    }
+
+    @Getter
+    @Builder
+    private static class Intermediate {
+        private final Double d1;
+        private final Double d2;
     }
 }

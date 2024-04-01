@@ -6,19 +6,12 @@ import lombok.Data;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Data
 @Builder
-@Entity
 public class Option implements Security {
-
-    @Id
-    private UUID id;
 
     private String symbol;
 

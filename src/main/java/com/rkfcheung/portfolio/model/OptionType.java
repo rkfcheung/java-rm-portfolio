@@ -1,6 +1,5 @@
 package com.rkfcheung.portfolio.model;
 
-import liquibase.repackaged.org.apache.commons.lang3.EnumUtils;
 import org.springframework.lang.Nullable;
 
 import java.util.Arrays;
