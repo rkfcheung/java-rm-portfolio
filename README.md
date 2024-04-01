@@ -45,6 +45,39 @@ TSLA-NOV-2024-400-C,10000
 TSLA-DEC-2024-400-P,-10000
 ```
 
+## Sample Output
+
+```text
+## 1 Market Data Update
+AAPL change to 94.10
+
+## Portfolio
+symbol                                      price              qty            value
+AAPL                                        94.10         1,000.00        94,100.00
+AAPL-OCT-2024-110-C                         13.43       -20,000.00      -268,600.00
+AAPL-OCT-2024-110-P                         28.05        20,000.00       561,000.00
+TSLA                                        61.32          -500.00       -30,660.00
+TSLA-NOV-2024-400-C                          0.01        10,000.00           100.00
+TSLA-DEC-2024-400-P                        332.75       -10,000.00    -3,327,500.00
+
+#Total portfolio                                                      -2,971,560.00
+
+
+## 2 Market Data Update
+TSLA change to 61.33
+
+## Portfolio
+symbol                                      price              qty            value
+AAPL                                        94.10         1,000.00        94,100.00
+AAPL-OCT-2024-110-C                         13.43       -20,000.00      -268,600.00
+AAPL-OCT-2024-110-P                         28.05        20,000.00       561,000.00
+TSLA                                        61.33          -500.00       -30,665.00
+TSLA-NOV-2024-400-C                          0.01        10,000.00           100.00
+TSLA-DEC-2024-400-P                        332.74       -10,000.00    -3,327,400.00
+
+#Total portfolio                                                      -2,971,465.00
+```
+
 ## Development Information
 
 | Item             | Value         |

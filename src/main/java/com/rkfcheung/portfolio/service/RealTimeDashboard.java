@@ -1,6 +1,7 @@
 package com.rkfcheung.portfolio.service;
 
 import com.rkfcheung.portfolio.connection.NavPricer;
+import com.rkfcheung.portfolio.model.NavEntry;
 import com.rkfcheung.portfolio.model.QuoteUpdate;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -8,8 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -51,12 +54,19 @@ public class RealTimeDashboard {
             return;
         }
 
+        final boolean changed = updates.stream().anyMatch(this::isChanged);
+        if (!changed) {
+            return;
+        }
+
         final StringBuilder sb = new StringBuilder();
         sb.append("## ").append(updated.getAndIncrement()).append(" Market Data Update\n");
         updates.forEach(update -> {
-            final String symbol = update.getEquity().getSymbol();
-            sb.append(symbol).append(" change to ").append(DECIMAL_FORMAT.format(update.getPrice())).append("\n");
-            navPricer.update(symbol);
+            if (isChanged(update)) {
+                final String symbol = update.getEquity().getSymbol();
+                sb.append(symbol).append(" change to ").append(DECIMAL_FORMAT.format(update.getPrice())).append("\n");
+                navPricer.update(symbol);
+            }
         });
         sb.append("\n");
         sb.append("## Portfolio\n");
@@ -77,5 +87,13 @@ public class RealTimeDashboard {
         System.out.println(dashboard);
 
         summary.set(dashboard);
+    }
+
+    private boolean isChanged(final @NonNull QuoteUpdate update) {
+        final BigDecimal newPrice = update.getPrice();
+        final NavEntry entry = navPricer.get(update.getEquity());
+        final BigDecimal currentPrice = Optional.ofNullable(entry).map(NavEntry::getPrice).orElse(BigDecimal.ZERO);
+
+        return newPrice.compareTo(currentPrice) != 0;
     }
 }
