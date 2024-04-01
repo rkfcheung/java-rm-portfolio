@@ -85,6 +85,6 @@ public class CsvSource implements Source {
             return null;
         }
 
-        return Position.of(parts[0], qty);
+        return Position.of(parts[0].trim().toUpperCase(), qty);
     }
 }

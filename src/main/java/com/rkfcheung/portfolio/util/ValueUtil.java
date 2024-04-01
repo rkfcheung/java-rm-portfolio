@@ -80,7 +80,7 @@ public class ValueUtil {
     @NonNull
     public static String truncate(final String value, final int maxLength) {
         if (ObjectUtils.isEmpty(value)) {
-            return "";
+            return "<null or empty>";
         }
 
         if (value.length() <= maxLength) {
