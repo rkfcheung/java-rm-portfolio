@@ -49,7 +49,8 @@ public class CsvSource implements Source {
             }
 
             final List<Position> result = new ArrayList<>();
-            log.debug("Loading {} with headers {} ...", input, ValueUtil.truncate(lines.get(0), 128));
+            final String header = lines.get(0).trim();
+            log.debug("Loading {} with header {} ...", input, ValueUtil.truncate(header, 128));
             for (int i = 1; i < lines.size(); i++) {
                 final String line = lines.get(i);
                 final Position position = parse(line);

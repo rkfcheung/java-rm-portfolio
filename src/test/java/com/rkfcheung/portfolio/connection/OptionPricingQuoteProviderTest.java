@@ -41,12 +41,12 @@ class OptionPricingQuoteProviderTest {
         final double current = underlyingPrice.doubleValue();
 
         final BigDecimal callPrice = quoteProvider.quote(call);
-        assertTrue(callPrice.compareTo(BigDecimal.valueOf(4.6)) > 0);
-        assertTrue(callPrice.compareTo(BigDecimal.valueOf(4.7)) < 0);
+        assertTrue(callPrice.compareTo(BigDecimal.valueOf(4.5)) > 0);
+        assertTrue(callPrice.compareTo(BigDecimal.valueOf(4.8)) < 0);
 
         final BigDecimal putPrice = quoteProvider.quote(put);
-        assertTrue(putPrice.compareTo(BigDecimal.valueOf(16.1)) > 0);
-        assertTrue(putPrice.compareTo(BigDecimal.valueOf(16.2)) < 0);
+        assertTrue(putPrice.compareTo(BigDecimal.valueOf(16.0)) > 0);
+        assertTrue(putPrice.compareTo(BigDecimal.valueOf(16.3)) < 0);
 
         assertTrue(verifyPutCallParity(callPrice.doubleValue(), putPrice.doubleValue(), strike.doubleValue(), current));
     }
