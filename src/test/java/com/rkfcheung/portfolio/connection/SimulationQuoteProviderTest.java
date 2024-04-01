@@ -5,6 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,7 +22,7 @@ class SimulationQuoteProviderTest {
         final Equity equity = Equity.builder().symbol(symbol).build();
         final BigDecimal currentPrice = quoteProvider.quote(equity);
         assertTrue(currentPrice.compareTo(BigDecimal.valueOf(0.01)) >= 0);
-        assertTrue(currentPrice.compareTo(BigDecimal.valueOf(100_000.0)) <= 0);
+        assertTrue(currentPrice.compareTo(BigDecimal.valueOf(128.0)) <= 0);
 
         final Double mu = ReflectionTestUtils.invokeMethod(quoteProvider, "mu", symbol);
         assertNotNull(mu);
@@ -37,5 +41,33 @@ class SimulationQuoteProviderTest {
         assertTrue(vol.compareTo(BigDecimal.ZERO) >= 0);
 
         assertEquals(vol, quoteProvider.volatility(symbol));
+    }
+
+    @Test
+    void testRandomQuoteAndVolatility() {
+        final Random random = new Random();
+        final List<String> symbols = new ArrayList<>();
+        for (int i = 0; i < 1_024; i++) {
+            final String symbol = UUID.randomUUID().toString();
+            if (random.nextBoolean()) {
+                assertTrue(quoteProvider.volatility(symbol).compareTo(BigDecimal.ZERO) >= 0);
+                assertTrue(quoteProvider.quote(symbol).compareTo(BigDecimal.ZERO) >= 0);
+            } else {
+                assertTrue(quoteProvider.quote(symbol).compareTo(BigDecimal.ZERO) >= 0);
+                assertTrue(quoteProvider.volatility(symbol).compareTo(BigDecimal.ZERO) >= 0);
+            }
+
+            symbols.add(symbol);
+        }
+
+        symbols.forEach(symbol -> {
+            if (random.nextBoolean()) {
+                assertTrue(quoteProvider.volatility(symbol).compareTo(BigDecimal.ZERO) >= 0);
+                assertTrue(quoteProvider.quote(symbol).compareTo(BigDecimal.ZERO) >= 0);
+            } else {
+                assertTrue(quoteProvider.quote(symbol).compareTo(BigDecimal.ZERO) >= 0);
+                assertTrue(quoteProvider.volatility(symbol).compareTo(BigDecimal.ZERO) >= 0);
+            }
+        });
     }
 }

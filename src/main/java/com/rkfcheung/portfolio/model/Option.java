@@ -71,4 +71,12 @@ public class Option implements Security {
                 .type(type)
                 .build();
     }
+
+    public boolean isExpired() {
+        if (maturity == null) {
+            return true;
+        }
+
+        return LocalDate.now().isAfter(maturity);
+    }
 }

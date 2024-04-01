@@ -3,7 +3,9 @@ package com.rkfcheung.portfolio.connection;
 import com.rkfcheung.portfolio.model.InterestRate;
 import com.rkfcheung.portfolio.model.Option;
 import com.rkfcheung.portfolio.model.OptionType;
+import com.rkfcheung.portfolio.util.ValueUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.util.Pair;
 import org.springframework.lang.NonNull;
 
@@ -11,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
 
+@Slf4j
 @RequiredArgsConstructor
 public class OptionPricingQuoteProvider extends OptionQuoteProvider {
 
@@ -22,28 +25,29 @@ public class OptionPricingQuoteProvider extends OptionQuoteProvider {
 
     @Override
     public BigDecimal quote(final @NonNull Option option) {
-        final double t = expiredInYear(option.getMaturity());
-        if (t == 0.0) {
+        if (option.isExpired()) {
             return BigDecimal.ZERO;
         }
 
-        final double strike = option.getStrike().doubleValue();
         final String underlying = option.getUnderlying();
-        final double k = currentUnderlyingPrice(underlying).doubleValue();
+        final double s = currentUnderlyingPrice(underlying).doubleValue();
+        final double k = option.getStrike().doubleValue();
         final double r = riskFreeRate().doubleValue();
+        final double t = expiredInYear(option.getMaturity());
         final double sigma = underlyingQuoteProvider.volatility(underlying).doubleValue();
+        log.info("Pricing {} with [s={}, r={}, t={}, sigma={}] ...", option, s, r, t, sigma);
 
         final double modelPrice;
         if (option.getType() == OptionType.C) {
-            modelPrice = calcCallPrice(strike, k, r, t, sigma);
+            modelPrice = calcCallPrice(s, k, r, t, sigma);
         } else {
-            modelPrice = calcPutPrice(strike, k, r, t, sigma);
+            modelPrice = calcPutPrice(s, k, r, t, sigma);
         }
 
-        return BigDecimal.valueOf(modelPrice);
+        return ValueUtil.round(BigDecimal.valueOf(Math.max(modelPrice, 0.0)));
     }
 
-    public double calcCallPrice(
+    private double calcCallPrice(
             final double s,
             final double k,
             final double r,
@@ -57,7 +61,8 @@ public class OptionPricingQuoteProvider extends OptionQuoteProvider {
         return s * cumulativeDistributionFunction(d1) - k * Math.exp(-r * t) * cumulativeDistributionFunction(d2);
     }
 
-    public Pair<Double, Double> calcD1D2(
+    @NonNull
+    private Pair<Double, Double> calcD1D2(
             final double s,
             final double k,
             final double r,
@@ -70,7 +75,7 @@ public class OptionPricingQuoteProvider extends OptionQuoteProvider {
         return Pair.of(d1, d2);
     }
 
-    public double calcPutPrice(
+    private double calcPutPrice(
             final double s,
             final double k,
             final double r,
@@ -103,12 +108,7 @@ public class OptionPricingQuoteProvider extends OptionQuoteProvider {
     }
 
     private double expiredInYear(final LocalDate maturity) {
-        final LocalDate currentDate = LocalDate.now();
-        if (currentDate.isAfter(maturity)) {
-            return 0.0;
-        }
-
-        final Period period = Period.between(currentDate, maturity);
+        final Period period = Period.between(LocalDate.now(), maturity);
 
         return period.getYears() + period.getMonths() / 12.0 + period.getDays() / 365.0;
     }

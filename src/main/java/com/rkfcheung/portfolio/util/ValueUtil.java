@@ -5,6 +5,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -79,6 +80,11 @@ public class ValueUtil {
         final DayOfWeek dayOfWeek = value.getDayOfWeek();
 
         return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
+    }
+
+    @NonNull
+    public static BigDecimal round(final @NonNull BigDecimal value) {
+        return value.setScale(5, RoundingMode.FLOOR);
     }
 
     @NonNull
