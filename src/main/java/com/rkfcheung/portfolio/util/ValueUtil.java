@@ -80,4 +80,17 @@ public class ValueUtil {
 
         return dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY;
     }
+
+    @NonNull
+    public static String truncate(final String value, final int maxLength) {
+        if (ObjectUtils.isEmpty(value)) {
+            return "";
+        }
+
+        if (value.length() <= maxLength) {
+            return value;
+        }
+
+        return value.substring(0, maxLength);
+    }
 }

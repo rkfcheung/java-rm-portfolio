@@ -5,12 +5,12 @@ import lombok.Value;
 
 @Value
 @Builder
-public class PortfolioPosition {
+public class Position {
 
     Security security;
     Long qty;
 
-    public static PortfolioPosition of(final String symbol, final long qty) {
+    public static Position of(final String symbol, final long qty) {
         final Security security;
         final Option option = Option.of(symbol);
         if (option == null) {
@@ -19,7 +19,7 @@ public class PortfolioPosition {
             security = option;
         }
 
-        return PortfolioPosition.builder()
+        return Position.builder()
                 .security(security)
                 .qty(qty)
                 .build();

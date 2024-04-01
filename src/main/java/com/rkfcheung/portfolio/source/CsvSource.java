@@ -1,6 +1,6 @@
 package com.rkfcheung.portfolio.source;
 
-import com.rkfcheung.portfolio.model.PortfolioPosition;
+import com.rkfcheung.portfolio.model.Position;
 import com.rkfcheung.portfolio.util.FileUtil;
 import com.rkfcheung.portfolio.util.ValueUtil;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +32,25 @@ public class CsvSource implements Source {
     }
 
     @Override
-    public List<PortfolioPosition> load() {
+    public List<Position> load() {
         try {
             final List<String> lines = Files.readAllLines(input.toPath());
-            final List<PortfolioPosition> result = new ArrayList<>();
+            if (lines.isEmpty()) {
+                log.warn("Empty input found: {}", input);
+
+                return Collections.emptyList();
+            }
+
+            final List<Position> result = new ArrayList<>();
+            log.info("Loading {} with headers {} ...", input, ValueUtil.truncate(lines.get(0), 128));
             for (int i = 1; i < lines.size(); i++) {
-                Optional.ofNullable(parse(lines.get(i)))
-                        .ifPresent(result::add);
+                final String line = lines.get(i);
+                final Position position = parse(line);
+                if (position == null) {
+                    log.warn("Failed to parse: {}", ValueUtil.truncate(line, 256));
+                } else {
+                    result.add(position);
+                }
             }
 
             return result;
@@ -50,7 +62,7 @@ public class CsvSource implements Source {
     }
 
     @Nullable
-    public PortfolioPosition parse(final String line) {
+    public Position parse(final String line) {
         if (ObjectUtils.isEmpty(line)) {
             return null;
         }
@@ -65,6 +77,6 @@ public class CsvSource implements Source {
             return null;
         }
 
-        return PortfolioPosition.of(parts[0], qty);
+        return Position.of(parts[0], qty);
     }
 }

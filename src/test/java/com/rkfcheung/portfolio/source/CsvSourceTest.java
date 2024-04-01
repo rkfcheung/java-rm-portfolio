@@ -1,7 +1,7 @@
 package com.rkfcheung.portfolio.source;
 
 import com.rkfcheung.portfolio.model.Option;
-import com.rkfcheung.portfolio.model.PortfolioPosition;
+import com.rkfcheung.portfolio.model.Position;
 import com.rkfcheung.portfolio.model.Security;
 import com.rkfcheung.portfolio.util.FileUtil;
 import com.rkfcheung.portfolio.util.SampleUtil;
@@ -28,11 +28,11 @@ class CsvSourceTest {
 
     @Test
     void testLoad() {
-        final List<PortfolioPosition> positions = source.load();
+        final List<Position> positions = source.load();
 
         assertEquals(6, positions.size());
 
-        final PortfolioPosition position = positions.get(1);
+        final Position position = positions.get(1);
         assertTrue(position.isOption());
 
         final Option option = (Option) position.getSecurity();
@@ -47,7 +47,7 @@ class CsvSourceTest {
             "MSFT, 750"
     })
     void testCsvParsing(final String symbol, final long qty) {
-        final PortfolioPosition position = source.parse(symbol + "," + qty);
+        final Position position = source.parse(symbol + "," + qty);
         assertNotNull(position);
         assertEquals(qty, position.getQty());
 
